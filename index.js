@@ -5,19 +5,29 @@ const cors = require('cors');
 
 const app = express();
 
-// เพิ่มขนาดการรับไฟล์รองรับการอัปโหลดรูปภาพ
+// ปรับขนาดการรับไฟล์เพื่อรองรับการอัปโหลดรูปภาพสินค้า Base64
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 
+// ฐานข้อมูลจำลองในหน่วยความจำ
 const db = {};
 
-// เข้าหน้าแรกให้เด้งไป /admin ทันที
+// ----------------------------------------------------
+// ROUTE ปลุกเว็บสำหรับ UPTIMEROBOT (สำคัญ)
+// ----------------------------------------------------
+app.all('/ping', (req, res) => {
+  res.status(200).send('PONG');
+});
+
+// เข้าหน้าแรก (/) ให้ Redirect ไปหน้า /admin ทันที
 app.get('/', (req, res) => {
   res.redirect('/admin');
 });
 
-// 1. API สร้าง QR Code
+// ----------------------------------------------------
+// 1. API: สร้าง QR Code และเก็บบันทึกข้อมูลสินค้า
+// ----------------------------------------------------
 app.post('/api/create-card', async (req, res) => {
   const { productName, serialNo, imageUrl } = req.body;
 
@@ -42,7 +52,9 @@ app.post('/api/create-card', async (req, res) => {
   }
 });
 
-// 2. หน้า Admin Panel (รองรับการเลือกไฟล์รูปภาพ)
+// ----------------------------------------------------
+// 2. GUI แอดมิน: Admin Panel (รองรับอัปโหลดรูปภาพ)
+// ----------------------------------------------------
 app.get('/admin', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -152,7 +164,9 @@ app.get('/admin', (req, res) => {
   `);
 });
 
-// 3. หน้าตรวจสอบสำหรับผู้ซื้อ
+// ----------------------------------------------------
+// 3. หน้าแสดงผลใบรับประกันสำหรับผู้ซื้อ
+// ----------------------------------------------------
 app.get('/verify/:tokenId', (req, res) => {
   const { tokenId } = req.params;
   const item = db[tokenId];
@@ -261,23 +275,4 @@ app.get('/verify/:tokenId', (req, res) => {
 
         ${
           item.scanCount > 1 
-            ? `<div class="warning-box">
-                ⚠️ <b>ຂໍ້ຄວນລະວັງ:</b> QR Code ນີ້ຖືກສະແກນມາແລ້ວ ${item.scanCount} ຄັ້ງ. ຖ້າທ່ານຊື້ສິນຄ້ານີ້ເປັນສິນຄ້າໃໝ່, ອາດມີຄວາມສ່ຽງທີ່ໃບຮັບປະກັນຖືກຄັດລອກ/ເລກຊ້ຳ.
-               </div>`
-            : `<div style="background: rgba(255, 77, 77, 0.1); border-radius: 8px; padding: 10px; font-size: 12px; color: #ff4d4d; text-align: center; margin-bottom: 20px;">
-                🎉 ການສະແກນເປີດໃຊ້ງານຄັ້ງທຳອິດ
-               </div>`
-        }
-
-        <div class="footer">
-          OFFICIAL AUTHENTICATION SYSTEM • 99th CENTURY VERIFIED
-        </div>
-      </div>
-
-    </body>
-    </html>
-  `);
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+            ? `<div
