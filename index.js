@@ -14,7 +14,7 @@ app.use(cors());
 const db = {};
 
 // ----------------------------------------------------
-// ROUTE ปลุกเว็บสำหรับ UPTIMEROBOT (สำคัญ)
+// ROUTE ปลุกเว็บสำหรับ UPTIMEROBOT (แก้ปัญหา 404)
 // ----------------------------------------------------
 app.all('/ping', (req, res) => {
   res.status(200).send('PONG');
@@ -275,4 +275,24 @@ app.get('/verify/:tokenId', (req, res) => {
 
         ${
           item.scanCount > 1 
-            ? `<div
+            ? `<div class="warning-box">
+                ⚠️ <b>ຂໍ້ຄວນລະວັງ:</b> QR Code ນີ້ຖືກສະແກນມາແລ້ວ ${item.scanCount} ຄັ້ງ. ຖ້າທ່ານຊື້ສິນຄ້ານີ້ເປັນສິນຄ້າໃໝ່, ອາດມີຄວາມສ່ຽງທີ່ໃບຮັບປະກັນຖືກຄັດລອກ/ເລກຊ້ຳ.
+               </div>`
+            : `<div style="background: rgba(255, 77, 77, 0.1); border-radius: 8px; padding: 10px; font-size: 12px; color: #ff4d4d; text-align: center; margin-bottom: 20px;">
+                🎉 ການສະແກນເປີດໃຊ້ງານຄັ້ງທຳອິດ
+               </div>`
+        }
+
+        <div class="footer">
+          OFFICIAL AUTHENTICATION SYSTEM • 99th CENTURY VERIFIED
+        </div>
+      </div>
+
+    </body>
+    </html>
+  `);
+});
+
+// เริ่มต้น Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
